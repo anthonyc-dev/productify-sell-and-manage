@@ -1,7 +1,13 @@
 import { Link, useNavigate } from "react-router";
 import { useMyProducts, useDeleteProduct } from "../hooks/useProducts";
 import LoadingSpinner from "../components/LoadingSpinner";
-import { PlusIcon, PackageIcon, EyeIcon, EditIcon, Trash2Icon } from "lucide-react";
+import {
+  PlusIcon,
+  PackageIcon,
+  EyeIcon,
+  EditIcon,
+  Trash2Icon,
+} from "lucide-react";
 
 const ProfilePage = () => {
   const navigate = useNavigate();
@@ -22,7 +28,7 @@ const ProfilePage = () => {
           <p className="text-base-content/60 text-sm">Manage your listings</p>
         </div>
         <Link to="/create" className="btn btn-primary btn-sm gap-1">
-          <PlusIcon className="size-4" /> New
+          <PlusIcon className="size-4" /> New Product
         </Link>
       </div>
 
@@ -40,7 +46,9 @@ const ProfilePage = () => {
           <div className="card-body items-center text-center py-16">
             <PackageIcon className="size-16 text-base-content/20" />
             <h3 className="card-title text-base-content/50">No products yet</h3>
-            <p className="text-base-content/40 text-sm">Start by creating your first product</p>
+            <p className="text-base-content/40 text-sm">
+              Start by creating your first product
+            </p>
             <Link to="/create" className="btn btn-primary btn-sm mt-4">
               Create Product
             </Link>
@@ -51,11 +59,34 @@ const ProfilePage = () => {
           {products.map((product) => (
             <div key={product.id} className="card card-side bg-base-300">
               <figure className="w-32 shrink-0">
-                <img src={product.imageUrl} alt={product.title} className="h-full object-cover" />
+                <img
+                  src={product.imageUrl}
+                  alt={product.title}
+                  className="h-full object-cover"
+                />
               </figure>
               <div className="card-body p-4">
                 <h2 className="card-title text-base">{product.title}</h2>
-                <p className="text-sm text-base-content/60 line-clamp-1">{product.description}</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-sm text-base-content/60">
+                    {product.description}
+                  </p>
+                  <div className="badge badge-accent badge-sm whitespace-nowrap">
+                    {product.inventory} in stock
+                  </div>
+                </div>
+                {product.colors && (
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {product.colors.split(",").map((color, index) => (
+                      <div
+                        key={index}
+                        className="w-3 h-3 rounded-full border border-base-content/20"
+                        style={{ backgroundColor: color.trim().toLowerCase() }}
+                        title={color.trim()}
+                      />
+                    ))}
+                  </div>
+                )}
                 <div className="card-actions justify-end mt-2">
                   <button
                     onClick={() => navigate(`/product/${product.id}`)}

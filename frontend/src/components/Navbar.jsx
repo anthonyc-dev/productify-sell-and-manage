@@ -1,10 +1,34 @@
 import { Link } from "react-router";
-import { SignInButton, SignUpButton, UserButton, useAuth } from "@clerk/clerk-react";
-import { ShoppingBagIcon, PlusIcon, UserIcon } from "lucide-react";
+import {
+  SignInButton,
+  SignUpButton,
+  UserButton,
+  useAuth,
+} from "@clerk/clerk-react";
+import { useMyOrders } from "../hooks/useOrders";
+import {
+  ShoppingBagIcon,
+  PlusIcon,
+  UserIcon,
+  ShoppingCartIcon,
+  PackageIcon,
+  ShoppingBasket,
+} from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
+import { useCart } from "../context/CartContext";
 
 function Navbar() {
   const { isSignedIn } = useAuth();
+  const cartContext = (() => {
+    try {
+      return useCart();
+    } catch {
+      return null;
+    }
+  })();
+  const totalItems = cartContext?.totalItems || 0;
+  const { data: orders } = useMyOrders({ enabled: isSignedIn });
+  const orderCount = orders?.length || 0;
 
   return (
     <div className="navbar bg-base-300">
@@ -13,7 +37,9 @@ function Navbar() {
         <div className="flex-1">
           <Link to="/" className="btn btn-ghost gap-2">
             <ShoppingBagIcon className="size-5 text-primary" />
-            <span className="text-lg font-bold font-mono uppercase tracking-wider">Productify</span>
+            <span className="text-lg font-bold font-mono uppercase tracking-wider">
+              Productify
+            </span>
           </Link>
         </div>
 
@@ -21,13 +47,34 @@ function Navbar() {
           <ThemeSelector />
           {isSignedIn ? (
             <>
-              <Link to="/create" className="btn btn-primary btn-sm gap-1">
+              {/* <Link to="/create" className="btn btn-primary btn-sm gap-1">
                 <PlusIcon className="size-4" />
                 <span className="hidden sm:inline">New Product</span>
+              </Link> */}
+              <Link to="/cart" className="btn btn-ghost btn-sm gap-1 indicator">
+                <ShoppingCartIcon className="size-4" />
+                {totalItems > 0 && (
+                  <span className="indicator-item badge badge-secondary badge-xs">
+                    {totalItems}
+                  </span>
+                )}
+                <span className="hidden sm:inline">Cart</span>
+              </Link>
+              <Link
+                to="/orders"
+                className="btn btn-ghost btn-sm gap-1 indicator"
+              >
+                <ShoppingBasket className="size-4" />
+                {orderCount > 0 && (
+                  <span className="indicator-item badge badge-secondary badge-xs">
+                    {orderCount}
+                  </span>
+                )}
+                <span className="hidden sm:inline">Orders</span>
               </Link>
               <Link to="/profile" className="btn btn-ghost btn-sm gap-1">
-                <UserIcon className="size-4" />
-                <span className="hidden sm:inline">Profile</span>
+                <PackageIcon className="size-4" />
+                <span className="hidden sm:inline">Products</span>
               </Link>
               <UserButton />
             </>

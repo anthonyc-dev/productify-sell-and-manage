@@ -47,3 +47,29 @@ export const deleteComment = async ({ commentId }) => {
   const { data } = await api.delete(`/comments/${commentId}`);
   return data;
 };
+
+// Orders API
+export const createOrder = async (orderData) => {
+  const { data } = await api.post("/orders", orderData);
+  return data;
+};
+
+export const getMyOrders = async () => {
+  const { data } = await api.get("/orders");
+  return data;
+};
+
+export const getOrderById = async (id) => {
+  const { data } = await api.get(`/orders/${id}`);
+  return data;
+};
+
+export const deleteOrder = async (id) => {
+  const { data } = await api.delete(`/orders/${id}`);
+  return data;
+};
+
+export const deleteAllOrders = async () => {
+  const { data } = await api.delete("/orders");
+  return data;
+};

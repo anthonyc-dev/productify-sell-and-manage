@@ -1,10 +1,13 @@
 import { Link } from "react-router";
 import { MessageCircleIcon } from "lucide-react";
+import { useAuth } from "@clerk/clerk-react";
 
 const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
 const ProductCard = ({ product }) => {
+  const { userId } = useAuth();
   const isNew = new Date(product.createdAt) > oneWeekAgo;
+  const isOwner = userId === product.userId;
 
   return (
     <Link
@@ -23,7 +26,25 @@ const ProductCard = ({ product }) => {
           {product.title}
           {isNew && <span className="badge badge-secondary badge-sm">NEW</span>}
         </h2>
-        <p className="text-sm text-base-content/70 line-clamp-2">{product.description}</p>
+        <div className="flex justify-between items-center mt-1">
+          <p className="text-primary font-bold">
+            ${parseFloat(product.price).toFixed(2)}
+          </p>
+          {isOwner && (
+            <span
+              className={`text-xs font-semibold ${
+                product.inventory > 0 ? "text-success" : "text-error"
+              }`}
+            >
+              {product.inventory > 0
+                ? `${product.inventory} left`
+                : "Out of stock"}
+            </span>
+          )}
+        </div>
+        <p className="text-sm text-base-content/70 line-clamp-2">
+          {product.description}
+        </p>
 
         <div className="divider my-1"></div>
 
@@ -35,7 +56,9 @@ const ProductCard = ({ product }) => {
                   <img src={product.user.imageUrl} alt={product.user.name} />
                 </div>
               </div>
-              <span className="text-xs text-base-content/60">{product.user.name}</span>
+              <span className="text-xs text-base-content/60">
+                {product.user.name}
+              </span>
             </div>
           )}
           {product.comments && (

@@ -8,6 +8,7 @@ import { clerkMiddleware } from "@clerk/express";
 import userRoutes from "./routes/userRoutes";
 import productRoutes from "./routes/productRoutes";
 import commentRoutes from "./routes/commentRoutes";
+import orderRoutes from "./routes/orderRoutes";
 
 const app = express();
 
@@ -19,11 +20,13 @@ app.use(express.urlencoded({ extended: true })); // parses form data (like HTML 
 
 app.get("/api/health", (req, res) => {
   res.json({
-    message: "Welcome to Productify API - Powered by PostgreSQL, Drizzle ORM & Clerk Auth",
+    message:
+      "Welcome to Productify API - Powered by PostgreSQL, Drizzle ORM & Clerk Auth",
     endpoints: {
       users: "/api/users",
       products: "/api/products",
       comments: "/api/comments",
+      orders: "/api/orders",
     },
   });
 });
@@ -31,6 +34,7 @@ app.get("/api/health", (req, res) => {
 app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/comments", commentRoutes);
+app.use("/api/orders", orderRoutes);
 
 if (ENV.NODE_ENV === "production") {
   const __dirname = path.resolve();
@@ -44,4 +48,6 @@ if (ENV.NODE_ENV === "production") {
   });
 }
 
-app.listen(ENV.PORT, () => console.log("Server is up and running on PORT:", ENV.PORT));
+app.listen(ENV.PORT, () =>
+  console.log("Server is up and running on PORT:", ENV.PORT),
+);

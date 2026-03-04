@@ -1,12 +1,16 @@
 import { db } from "./index";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 import {
   users,
   comments,
   products,
+  orders,
+  orderItems,
   type NewUser,
   type NewComment,
   type NewProduct,
+  type NewOrder,
+  type NewOrderItem,
 } from "./schema";
 
 // USER QUERIES
@@ -25,20 +29,17 @@ export const updateUser = async (id: string, data: Partial<NewUser>) => {
     throw new Error(`User with id ${id} not found`);
   }
 
-  const [user] = await db.update(users).set(data).where(eq(users.id, id)).returning();
+  const [user] = await db
+    .update(users)
+    .set(data)
+    .where(eq(users.id, id))
+    .returning();
   return user;
 };
 
 // upsert => create or update
 
 export const upsertUser = async (data: NewUser) => {
-  // this is what we have done first
-  // const existingUser = await getUserById(data.id);
-  // if (existingUser) return updateUser(data.id, data);
-
-  // return createUser(data);
-
-  // and this is what CR suggested
   const [user] = await db
     .insert(users)
     .values(data)
@@ -59,8 +60,7 @@ export const createProduct = async (data: NewProduct) => {
 export const getAllProducts = async () => {
   return db.query.products.findMany({
     with: { user: true },
-    orderBy: (products, { desc }) => [desc(products.createdAt)], // desc means: you will see the latest products first
-    // the square brackets are required because Drizzle ORM's orderBy expects an array, even for a single column.
+    orderBy: (products, { desc }) => [desc(products.createdAt)],
   });
 };
 
@@ -91,7 +91,11 @@ export const updateProduct = async (id: string, data: Partial<NewProduct>) => {
     throw new Error(`Product with id ${id} not found`);
   }
 
-  const [product] = await db.update(products).set(data).where(eq(products.id, id)).returning();
+  const [product] = await db
+    .update(products)
+    .set(data)
+    .where(eq(products.id, id))
+    .returning();
   return product;
 };
 
@@ -101,7 +105,10 @@ export const deleteProduct = async (id: string) => {
     throw new Error(`Product with id ${id} not found`);
   }
 
-  const [product] = await db.delete(products).where(eq(products.id, id)).returning();
+  const [product] = await db
+    .delete(products)
+    .where(eq(products.id, id))
+    .returning();
   return product;
 };
 
@@ -117,7 +124,10 @@ export const deleteComment = async (id: string) => {
     throw new Error(`Comment with id ${id} not found`);
   }
 
-  const [comment] = await db.delete(comments).where(eq(comments.id, id)).returning();
+  const [comment] = await db
+    .delete(comments)
+    .where(eq(comments.id, id))
+    .returning();
   return comment;
 };
 
@@ -126,4 +136,88 @@ export const getCommentById = async (id: string) => {
     where: eq(comments.id, id),
     with: { user: true },
   });
+};
+
+// ORDER QUERIES
+export const createOrder = async (
+  orderData: NewOrder,
+  items: {
+    productId: string;
+    quantity: number;
+    price: string;
+    selectedColor?: string;
+  }[],
+) => {
+  return await db.transaction(async (tx) => {
+    // Create the order
+    const [order] = await tx.insert(orders).values(orderData).returning();
+
+    // Prepare order items
+    const orderItemsData = items.map((item) => ({
+      orderId: order.id,
+      productId: item.productId,
+      quantity: item.quantity,
+      price: item.price,
+      selectedColor: item.selectedColor,
+    }));
+
+    // Insert order items
+    await tx.insert(orderItems).values(orderItemsData);
+
+    // Decrement inventory for each product
+    for (const item of items) {
+      // Get current product to verify inventory again inside transaction (prevents race conditions)
+      const [product] = await tx
+        .select()
+        .from(products)
+        .where(eq(products.id, item.productId));
+
+      if (!product || product.inventory < item.quantity) {
+        throw new Error(
+          `Insufficient inventory for product: ${item.productId}`,
+        );
+      }
+
+      await tx
+        .update(products)
+        .set({ inventory: product.inventory - item.quantity })
+        .where(eq(products.id, item.productId));
+    }
+
+    return getOrderById(order.id);
+  });
+};
+
+export const getOrdersByUserId = async (userId: string) => {
+  return db.query.orders.findMany({
+    where: eq(orders.userId, userId),
+    with: {
+      items: {
+        with: { product: { with: { user: true } } },
+      },
+    },
+    orderBy: (orders, { desc }) => [desc(orders.createdAt)],
+  });
+};
+
+export const getOrderById = async (id: string) => {
+  return db.query.orders.findFirst({
+    where: eq(orders.id, id),
+    with: {
+      items: {
+        with: { product: { with: { user: true } } },
+      },
+    },
+  });
+};
+
+export const deleteOrder = async (orderId: string, userId: string) => {
+  return db
+    .delete(orders)
+    .where(and(eq(orders.id, orderId), eq(orders.userId, userId)))
+    .returning();
+};
+
+export const deleteAllOrders = async (userId: string) => {
+  return db.delete(orders).where(eq(orders.userId, userId)).returning();
 };
