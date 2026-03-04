@@ -2,17 +2,18 @@ import { Link } from "react-router";
 import {
   SignInButton,
   SignUpButton,
-  UserButton,
   useAuth,
+  useUser,
+  useClerk,
 } from "@clerk/clerk-react";
 import { useMyOrders } from "../hooks/useOrders";
 import {
   ShoppingBagIcon,
-  PlusIcon,
-  UserIcon,
   ShoppingCartIcon,
   PackageIcon,
   ShoppingBasket,
+  LogOutIcon,
+  SettingsIcon,
 } from "lucide-react";
 import ThemeSelector from "./ThemeSelector";
 import { useCart } from "../context/CartContext";
@@ -29,6 +30,14 @@ function Navbar() {
   const totalItems = cartContext?.totalItems || 0;
   const { data: orders } = useMyOrders({ enabled: isSignedIn });
   const orderCount = orders?.length || 0;
+
+  const { user } = useUser();
+  const { signOut, openUserProfile } = useClerk();
+
+  const googleAccount = user?.externalAccounts.find(
+    (acc) => acc.provider === "google",
+  );
+  const bestImageUrl = googleAccount?.imageUrl || user?.imageUrl;
 
   return (
     <div className="navbar bg-base-300">
@@ -76,7 +85,50 @@ function Navbar() {
                 <PackageIcon className="size-4" />
                 <span className="hidden sm:inline">Products</span>
               </Link>
-              <UserButton />
+
+              {/* Custom User Dropdown */}
+              <div className="dropdown dropdown-end">
+                <div
+                  tabIndex={0}
+                  role="button"
+                  className="btn btn-ghost btn-circle avatar"
+                >
+                  <div className="w-8 h-8 rounded-full ring ring-primary ring-offset-base-100 ring-offset-2 overflow-hidden shadow-lg">
+                    <img
+                      src={bestImageUrl}
+                      alt={user?.fullName || "User"}
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                </div>
+                <ul
+                  tabIndex={0}
+                  className="mt-3 z-1 p-2 shadow-xl menu menu-sm dropdown-content bg-base-300 rounded-box w-52 border border-base-content/10"
+                >
+                  <li className="menu-title px-4 py-2 opacity-50 text-[10px] uppercase font-bold tracking-widest">
+                    Account
+                  </li>
+                  <li>
+                    <button
+                      onClick={() => openUserProfile()}
+                      className="gap-3 py-3"
+                    >
+                      <SettingsIcon className="size-4" />
+                      <span>Manage Profile</span>
+                    </button>
+                  </li>
+                  <div className="divider my-0 opacity-10"></div>
+                  <li>
+                    <button
+                      onClick={() => signOut()}
+                      className="text-error gap-3 py-3 hover:bg-error/10"
+                    >
+                      <LogOutIcon className="size-4" />
+                      <span>Sign Out</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </>
           ) : (
             <>

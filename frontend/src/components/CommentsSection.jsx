@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useAuth, SignInButton } from "@clerk/clerk-react";
 import { useCreateComment, useDeleteComment } from "../hooks/useComments";
-import { SendIcon, Trash2Icon, MessageSquareIcon, LogInIcon } from "lucide-react";
+import {
+  SendIcon,
+  Trash2Icon,
+  MessageSquareIcon,
+  LogInIcon,
+} from "lucide-react";
 
 function CommentsSection({ productId, comments = [], currentUserId }) {
   const { isSignedIn } = useAuth();
@@ -12,7 +17,10 @@ function CommentsSection({ productId, comments = [], currentUserId }) {
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!content.trim()) return;
-    createComment.mutate({ productId, content }, { onSuccess: () => setContent("") });
+    createComment.mutate(
+      { productId, content },
+      { onSuccess: () => setContent("") },
+    );
   };
 
   return (
@@ -47,7 +55,9 @@ function CommentsSection({ productId, comments = [], currentUserId }) {
         </form>
       ) : (
         <div className="flex items-center justify-between bg-base-200 rounded-lg p-3">
-          <span className="text-sm text-base-content/60">Sign in to join the conversation</span>
+          <span className="text-sm text-base-content/60">
+            Sign in to join the conversation
+          </span>
           <SignInButton mode="modal">
             <button className="btn btn-primary btn-sm gap-1">
               <LogInIcon className="size-4" />
@@ -79,13 +89,16 @@ function CommentsSection({ productId, comments = [], currentUserId }) {
                 </time>
               </div>
 
-              <div className="chat-bubble chat-bubble-neutral text-sm">{comment.content}</div>
+              <div className="chat-bubble chat-bubble-neutral text-sm">
+                {comment.content}
+              </div>
 
               {currentUserId === comment.userId && (
                 <div className="chat-footer">
                   <button
                     onClick={() =>
-                      confirm("Delete?") && deleteComment.mutate({ commentId: comment.id })
+                      confirm("Delete?") &&
+                      deleteComment.mutate({ commentId: comment.id })
                     }
                     className="btn btn-ghost btn-xs text-error"
                     disabled={deleteComment.isPending}

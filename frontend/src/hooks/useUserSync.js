@@ -8,17 +8,34 @@ function useUserSync() {
   const { isSignedIn } = useAuth();
   const { user } = useUser();
 
-  const { mutate: syncUserMutation, isPending, isSuccess } = useMutation({ mutationFn: syncUser });
+  const {
+    mutate: syncUserMutation,
+    isPending,
+    isSuccess,
+  } = useMutation({ mutationFn: syncUser });
 
   useEffect(() => {
-    if (isSignedIn && user && !isPending && !isSuccess) {
+    if (isSignedIn && user && !isPending) {
+      // Prioritize Google profile image if available
+      const googleAccount = user.externalAccounts.find(
+        (acc) => acc.provider === "google",
+      );
+      const bestImageUrl = googleAccount?.imageUrl || user.imageUrl;
+
       syncUserMutation({
         email: user.primaryEmailAddress?.emailAddress,
         name: user.fullName || user.firstName,
-        imageUrl: user.imageUrl,
+        imageUrl: bestImageUrl,
       });
     }
-  }, [isSignedIn, user, syncUserMutation, isPending, isSuccess]);
+  }, [
+    isSignedIn,
+    user?.fullName,
+    user?.primaryEmailAddress?.emailAddress,
+    user?.imageUrl,
+    syncUserMutation,
+    isPending,
+  ]);
 
   return { isSynced: isSuccess };
 }
