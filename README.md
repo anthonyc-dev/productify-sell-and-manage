@@ -511,7 +511,7 @@ import { ArrowRightIcon } from "@heroicons/react/24/outline";
 
 export function Hero() {
   return (
-    <div className="hero min-h-[500px] bg-gradient-to-r from-primary to-secondary text-white">
+    <div className="hero min-h-[500px] bg-linear-gradient-to-r from-primary to-secondary text-white">
       <div className="hero-content text-center">
         <div className="max-w-2xl">
           <h1 className="text-5xl font-bold mb-5 animate-fade-in">
