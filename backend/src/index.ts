@@ -9,6 +9,7 @@ import userRoutes from "./routes/userRoutes";
 import productRoutes from "./routes/productRoutes";
 import commentRoutes from "./routes/commentRoutes";
 import orderRoutes from "./routes/orderRoutes";
+import ratingRoutes from "./routes/ratingRoutes";
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/comments", commentRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/ratings", ratingRoutes);
 
 if (ENV.NODE_ENV === "production") {
   const __dirname = path.resolve();

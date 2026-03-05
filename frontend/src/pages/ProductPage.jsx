@@ -9,11 +9,15 @@ import {
   PlusIcon,
   MinusIcon,
   PaletteIcon,
+  StarIcon,
+  MessageSquareIcon,
 } from "lucide-react";
 import LoadingSpinner from "../components/LoadingSpinner";
 import CommentsSection from "../components/CommentsSection";
+import StarRating from "../components/StarRating";
 import { useAuth } from "@clerk/clerk-react";
 import { useProduct, useDeleteProduct } from "../hooks/useProducts";
+import { useRateProduct } from "../hooks/useRatings";
 import { useParams, Link, useNavigate } from "react-router";
 import { useCart } from "../context/CartContext";
 import { useState } from "react";
@@ -27,9 +31,12 @@ function ProductPage() {
   const [showModal, setShowModal] = useState(false);
   const [selectedColor, setSelectedColor] = useState("");
   const [quantity, setQuantity] = useState(1);
+  const [userFeedback, setUserFeedback] = useState("");
 
   const { data: product, isLoading, error } = useProduct(id);
   const deleteProduct = useDeleteProduct();
+  const rateProduct = useRateProduct();
+  const [userRating, setUserRating] = useState(0);
 
   const handleDelete = () => {
     if (confirm("Delete this product permanently?")) {
@@ -121,6 +128,71 @@ function ProductPage() {
             <p className="text-3xl font-bold text-primary mt-1">
               ${parseFloat(product.price).toFixed(2)}
             </p>
+
+            {/* Ratings Display */}
+            {product.ratings && product.ratings.length > 0 && (
+              <div className="flex items-center gap-2 mt-2">
+                <StarRating rating={Math.round(product.ratings.reduce((sum, r) => sum + r.rating, 0) / product.ratings.length)} size="md" />
+                <span className="text-sm text-base-content/60">
+                  ({product.ratings.length} rating{product.ratings.length !== 1 ? "s" : ""})
+                </span>
+              </div>
+            )}
+
+            {/* Feedback Reviews */}
+            {product.ratings && product.ratings.some((r) => r.feedback) && (
+              <div className="mt-4">
+                <p className="text-sm font-medium flex items-center gap-1">
+                  <MessageSquareIcon className="size-4" /> Reviews
+                </p>
+                <div className="mt-2 space-y-2">
+                  {product.ratings.filter((r) => r.feedback).map((review) => (
+                    <div key={review.id} className="bg-base-200 p-3 rounded-lg">
+                      <div className="flex items-center gap-2">
+                        <div className="avatar">
+                          <div className="w-6 rounded-full">
+                            <img src={review.user?.imageUrl} alt={review.user?.name} />
+                          </div>
+                        </div>
+                        <span className="text-sm font-medium">{review.user?.name || "Anonymous"}</span>
+                        <StarRating rating={review.rating} size="sm" />
+                      </div>
+                      <p className="text-sm text-base-content/70 mt-1">{review.feedback}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Rate Product Section */}
+            {isSignedIn && !isOwner && (
+              <div className="mt-3 p-3 bg-base-200 rounded-lg">
+                <p className="text-sm font-medium mb-2">Rate this product</p>
+                <StarRating
+                  rating={userRating}
+                  onRate={(rating) => setUserRating(rating)}
+                  interactive
+                  size="lg"
+                />
+                <textarea
+                  className="textarea textarea-bordered w-full mt-2 text-sm"
+                  placeholder="Write your feedback (optional)"
+                  value={userFeedback}
+                  onChange={(e) => setUserFeedback(e.target.value)}
+                  rows={2}
+                />
+                <button
+                  className="btn btn-primary btn-sm mt-2"
+                  disabled={userRating === 0 || rateProduct.isPending}
+                  onClick={() => rateProduct.mutate({ productId: id, rating: userRating, feedback: userFeedback })}
+                >
+                  {rateProduct.isPending ? "Submitting..." : "Submit Review"}
+                </button>
+                {rateProduct.isSuccess && (
+                  <p className="text-xs text-success mt-1">Thanks for your review!</p>
+                )}
+              </div>
+            )}
 
             <div className="flex flex-wrap gap-4 text-sm text-base-content/60 my-2">
               <div className="flex items-center gap-1">

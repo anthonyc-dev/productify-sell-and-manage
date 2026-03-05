@@ -73,3 +73,19 @@ export const deleteAllOrders = async () => {
   const { data } = await api.delete("/orders");
   return data;
 };
+
+// Ratings API
+export const rateProduct = async ({ productId, rating, feedback }) => {
+  const { data } = await api.post(`/ratings/${productId}`, { rating, feedback });
+  return data;
+};
+
+export const getProductRatings = async (productId) => {
+  const { data } = await api.get(`/ratings/${productId}`);
+  return data;
+};
+
+export const getMyProductRatings = async () => {
+  const { data } = await api.get("/ratings/my/products");
+  return data;
+};

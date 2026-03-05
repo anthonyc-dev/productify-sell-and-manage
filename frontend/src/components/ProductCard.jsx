@@ -1,6 +1,7 @@
 import { Link } from "react-router";
-import { MessageCircleIcon } from "lucide-react";
+import { MessageCircleIcon, StarIcon } from "lucide-react";
 import { useAuth } from "@clerk/clerk-react";
+import StarRating from "./StarRating";
 
 const oneWeekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
 
@@ -8,6 +9,12 @@ const ProductCard = ({ product }) => {
   const { userId } = useAuth();
   const isNew = new Date(product.createdAt) > oneWeekAgo;
   const isOwner = userId === product.userId;
+
+  const ratings = product.ratings || [];
+  const avgRating = ratings.length > 0
+    ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+    : 0;
+  const displayRating = parseFloat(avgRating.toFixed(1));
 
   return (
     <Link
@@ -30,6 +37,13 @@ const ProductCard = ({ product }) => {
           <p className="text-primary font-bold">
             ${parseFloat(product.price).toFixed(2)}
           </p>
+          {ratings.length > 0 && (
+            <div className="flex items-center gap-1">
+              <StarIcon className="size-3 fill-yellow-400 text-yellow-400" />
+              <span className="text-xs font-medium">{displayRating}</span>
+              <span className="text-xs text-base-content/50">({ratings.length})</span>
+            </div>
+          )}
           {isOwner && (
             <span
               className={`text-xs font-semibold ${

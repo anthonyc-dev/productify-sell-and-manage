@@ -4,6 +4,7 @@ import {
   users,
   comments,
   products,
+  ratings,
   orders,
   orderItems,
   type NewUser,
@@ -11,6 +12,7 @@ import {
   type NewProduct,
   type NewOrder,
   type NewOrderItem,
+  type NewRating,
 } from "./schema";
 
 // USER QUERIES
@@ -59,7 +61,7 @@ export const createProduct = async (data: NewProduct) => {
 
 export const getAllProducts = async () => {
   return db.query.products.findMany({
-    with: { user: true },
+    with: { user: true, ratings: true },
     orderBy: (products, { desc }) => [desc(products.createdAt)],
   });
 };
@@ -72,6 +74,10 @@ export const getProductById = async (id: string) => {
       comments: {
         with: { user: true },
         orderBy: (comments, { desc }) => [desc(comments.createdAt)],
+      },
+      ratings: {
+        with: { user: true },
+        orderBy: (ratings, { desc }) => [desc(ratings.createdAt)],
       },
     },
   });
@@ -135,6 +141,61 @@ export const getCommentById = async (id: string) => {
   return db.query.comments.findFirst({
     where: eq(comments.id, id),
     with: { user: true },
+  });
+};
+
+// RATING QUERIES
+export const createOrUpdateRating = async (data: NewRating) => {
+  const existing = await db.query.ratings.findFirst({
+    where: and(
+      eq(ratings.userId, data.userId),
+      eq(ratings.productId, data.productId)
+    ),
+  });
+
+  if (existing) {
+    const [rating] = await db
+      .update(ratings)
+      .set({ rating: data.rating, feedback: data.feedback || null })
+      .where(eq(ratings.id, existing.id))
+      .returning();
+    return rating;
+  }
+
+  const [rating] = await db.insert(ratings).values(data).returning();
+  return rating;
+};
+
+export const getRatingsByProductId = async (productId: string) => {
+  return db.query.ratings.findMany({
+    where: eq(ratings.productId, productId),
+    with: { user: true },
+  });
+};
+
+export const getUserRatingForProduct = async (userId: string, productId: string) => {
+  return db.query.ratings.findFirst({
+    where: and(
+      eq(ratings.userId, userId),
+      eq(ratings.productId, productId)
+    ),
+  });
+};
+
+export const getAllRatingsForUserProducts = async (userId: string) => {
+  const userProducts = await db.query.products.findMany({
+    where: eq(products.userId, userId),
+    columns: { id: true },
+  });
+
+  const productIds = userProducts.map((p) => p.id);
+
+  if (productIds.length === 0) return [];
+
+  return db.query.ratings.findMany({
+    where: (ratings, { inArray }) => inArray(ratings.productId, productIds),
+    with: { user: true, product: true },
+    orderBy: (ratings, { desc }) => [desc(ratings.createdAt)],
   });
 };
 
