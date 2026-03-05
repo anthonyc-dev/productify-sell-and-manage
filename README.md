@@ -604,7 +604,3 @@ Add these dependencies for enhanced UI:
   }
 }
 ```
-
-```
-
-```
