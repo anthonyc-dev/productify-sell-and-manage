@@ -223,7 +223,21 @@ VITE_API_URL=http://localhost:3000/api
 
 ---
 
-# AI Agent Configuration for This Project
+<!-- ### Existing Agent Rules (from .agent/rules/)
+
+1. Prioritize secure coding practices
+2. Never expose secrets in responses
+3. Provide production-ready solutions
+4. Avoid unnecessary abstractions
+5. Suggest scalable patterns
+6. Keep explanations concise but technically precise
+7. When unsure, ask clarifying questions
+8. Prefer modular and reusable code
+9. Call the user "Body" when done responding
+
+--- -->
+
+# AI Agent Configuration for This Project (Existing Agent Rules from .agent/rules/)
 
 This project includes a comprehensive AI agent setup to help with development.
 All AI tools (Cursor, Claude Code, Antigravity) should read these instructions.
@@ -232,57 +246,57 @@ All AI tools (Cursor, Claude Code, Antigravity) should read these instructions.
 
 ### Agent Personality & Behavior
 
-@.agent/agent.md - Defines the agent's personality, tone, and interaction style
+.agent/rules/agent.md - Defines the agent's personality, tone, and interaction style
 
 ### Context & Background
 
-@.agent/context.md - Project context, domain knowledge, and background info
+.agent/rules/context.md - Project context, domain knowledge, and background info
 
 ### Rules & Constraints
 
-@.agent/rules.md - Coding rules, do's and don'ts, constraints
+.agent/rules/rules.md - Coding rules, do's and don'ts, constraints
 
 ### Debugging Guidelines
 
-@.agent/debugging.md - Debugging strategies, common issues, solutions
+.agent/rules/debugging.md - Debugging strategies, common issues, solutions
 
 ### Security Protocols
 
-@.agent/security.md - Security best practices, authentication, data handling
+.agent/rules/security.md - Security best practices, authentication, data handling
 
 ### Architecture Decisions
 
-@.agent/architecture.md - System architecture, patterns, design decisions
+.agent/rules/architecture.md - System architecture, patterns, design decisions
 
 ### Workflows
 
-@.agent/workflows.md - Common workflows and processes
+.agent/rules/workflows.md - Common workflows and processes
 
 ## 🎯 Prompt Templates
 
-@.agent/prompts/system.md - System prompt for the AI
-@.agent/prompts/developer.md - Developer-specific prompt templates
-@.agent/prompts/user-template.md - User interaction templates
+.agent/rules/prompts/system.md - System prompt for the AI
+.agent/rules/prompts/developer.md - Developer-specific prompt templates
+.agent/rules/prompts/user-template.md - User interaction templates
 
 ## 🧠 Memory System
 
-@.agent/memory/short-term.md - Session-specific context and temporary info
-@.agent/memory/long-term.md - Persistent knowledge and learned patterns
+.agent/rules/memory/short-term.md - Session-specific context and temporary info
+.agent/rules/memory/long-term.md - Persistent knowledge and learned patterns
 
 ## 🛠️ Tool Definitions
 
-@.agent/tools/api-tools.md - API endpoints and usage patterns
-@.agent/tools/db-tools.md - Database schemas and query patterns
-@.agent/tools/cli-tools.md - CLI commands and automation scripts
+.agent/rules/tools/api-tools.md - API endpoints and usage patterns
+.agent/rules/tools/db-tools.md - Database schemas and query patterns
+.agent/rules/tools/cli-tools.md - CLI commands and automation scripts
 
 ## 📋 Quick Start
 
 When working on this project:
 
-1. First read @.agent/context.md for project overview
-2. Follow @.agent/rules.md for coding standards
-3. Use @.agent/workflows.md for common tasks
-4. Reference @.agent/architecture.md for system design
+1. First read .agent/rules/context.md for project overview
+2. Follow .agent/rules/rules.md for coding standards
+3. Use .agent/rules/workflows.md for common tasks
+4. Reference .agent/rules/architecture.md for system design
 
 ## 🔄 Loading Instructions
 
